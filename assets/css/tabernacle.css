@@ -1,0 +1,517 @@
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  Cyber-Cathedral — Tabernacle Styles
+ *  Digital Tabernacle × DjDigitalProfitz
+ * ═══════════════════════════════════════════════════════════════════════════
+ *
+ *  Design language: Ancient scripture meets DeFi dashboard
+ *  Palette: void black, prophetic gold, altar purple, digital cyan
+ *  Typography: Monospaced prophecy fonts
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+/* ═══════════ ROOT TOKENS ═══════════ */
+
+:root {
+  --dt-void:            #0a080f;
+  --dt-void-deep:       #050309;
+  --dt-gold:            #d4af37;
+  --dt-gold-dim:        #a67c00;
+  --dt-gold-glow:       rgba(212, 175, 55, 0.4);
+  --dt-purple:          #8a2be2;
+  --dt-purple-dim:      #5a1d8e;
+  --dt-cyan:            #00ffff;
+  --dt-cyan-dim:        #007777;
+  --dt-blood:           #8b0000;
+  --dt-parchment:       #e8dcc8;
+  --dt-smoke:           rgba(255, 255, 255, 0.06);
+  --dt-font-prophecy:   'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
+  --dt-font-scripture:  'Georgia', 'Noto Serif', serif;
+  --dt-radius:          6px;
+  --dt-transition:      0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ═══════════ ORACLE FEED ═══════════ */
+
+.dt-oracle-feed {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: var(--dt-font-prophecy);
+}
+
+/* ── Oracle Cards ── */
+
+.oracle-card {
+  position: relative;
+  display: flex;
+  gap: 1.25rem;
+  background: linear-gradient(135deg, var(--dt-void) 0%, rgba(138, 43, 226, 0.06) 100%);
+  border: 1px solid var(--dt-gold-dim);
+  border-left: 3px solid var(--dt-gold);
+  border-radius: var(--dt-radius);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  transition: box-shadow var(--dt-transition), border-color var(--dt-transition);
+  overflow: hidden;
+}
+
+.oracle-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--dt-gold), transparent);
+  opacity: 0.5;
+}
+
+.oracle-card:hover {
+  border-color: var(--dt-gold);
+  box-shadow: 0 0 25px var(--dt-gold-glow), inset 0 0 60px rgba(212, 175, 55, 0.03);
+}
+
+.oracle-card__image {
+  position: relative;
+  flex-shrink: 0;
+  width: 140px;
+  height: 140px;
+  border-radius: var(--dt-radius);
+  overflow: hidden;
+}
+
+.oracle-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.8) contrast(1.1);
+  transition: filter var(--dt-transition);
+}
+
+.oracle-card:hover .oracle-card__image img {
+  filter: saturate(1.2) contrast(1.15);
+}
+
+.oracle-card__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--dt-gold-glow) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--dt-transition);
+  pointer-events: none;
+}
+
+.oracle-card:hover .oracle-card__glow {
+  opacity: 1;
+}
+
+.oracle-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.oracle-card__headline {
+  font-family: var(--dt-font-prophecy);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--dt-cyan);
+  margin-bottom: 0.4rem;
+  line-height: 1.4;
+}
+
+.headline-prefix {
+  color: var(--dt-gold);
+  font-weight: 700;
+}
+
+.oracle-card__title {
+  font-family: var(--dt-font-scripture);
+  font-size: 1.2rem;
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+}
+
+.oracle-card__title a {
+  color: var(--dt-parchment);
+  text-decoration: none;
+  transition: color var(--dt-transition);
+}
+
+.oracle-card__title a:hover {
+  color: var(--dt-gold);
+}
+
+.oracle-card__excerpt {
+  font-size: 0.85rem;
+  color: rgba(232, 220, 200, 0.65);
+  line-height: 1.5;
+  margin: 0 0 0.75rem;
+}
+
+.oracle-card__meta {
+  display: flex;
+  gap: 1.25rem;
+  font-size: 0.75rem;
+  color: rgba(232, 220, 200, 0.4);
+  margin-bottom: 0.75rem;
+}
+
+.oracle-card__bounty {
+  color: var(--dt-gold);
+  font-weight: 600;
+}
+
+/* ── Action Buttons ── */
+
+.oracle-card__actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.oracle-card__actions button {
+  font-family: var(--dt-font-prophecy);
+  font-size: 0.78rem;
+  padding: 0.45rem 1rem;
+  border-radius: var(--dt-radius);
+  border: 1px solid;
+  cursor: pointer;
+  transition: all var(--dt-transition);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Play button */
+.dt-play-btn {
+  background: transparent;
+  border-color: var(--dt-cyan-dim) !important;
+  color: var(--dt-cyan);
+}
+
+.dt-play-btn:hover {
+  background: rgba(0, 255, 255, 0.08);
+  border-color: var(--dt-cyan) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.25);
+}
+
+/* Harvest button */
+.dt-harvest-btn {
+  background: transparent;
+  border-color: var(--dt-gold-dim) !important;
+  color: var(--dt-gold-dim);
+}
+
+.dt-harvest-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.dt-harvest-btn:not(:disabled):hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--dt-gold) !important;
+}
+
+/* Share button */
+.dt-share-btn {
+  background: transparent;
+  border-color: var(--dt-purple-dim) !important;
+  color: var(--dt-purple);
+}
+
+.dt-share-btn:hover {
+  background: rgba(138, 43, 226, 0.1);
+  border-color: var(--dt-purple) !important;
+}
+
+/* ═══════════ HOLY LIGHT — Prophetic Threshold Glow ═══════════ */
+
+@keyframes holy-pulse {
+  0%, 100% { box-shadow: 0 0 8px var(--dt-gold-glow), 0 0 20px rgba(212, 175, 55, 0.15); }
+  50%      { box-shadow: 0 0 20px var(--dt-gold-glow), 0 0 50px rgba(212, 175, 55, 0.3); }
+}
+
+.holy-light-active {
+  animation: holy-pulse 1.5s ease-in-out infinite !important;
+  border-color: var(--dt-gold) !important;
+  color: var(--dt-gold) !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  text-shadow: 0 0 8px var(--dt-gold-glow);
+}
+
+.holy-light-active::after {
+  content: ' ✦';
+}
+
+/* ═══════════ ORACLE GLITCH — Treble-reactive ═══════════ */
+
+@keyframes oracle-glitch {
+  0%   { transform: translate(0); filter: none; }
+  20%  { transform: translate(-2px, 1px); filter: hue-rotate(40deg); }
+  40%  { transform: translate(2px, -1px); filter: hue-rotate(-40deg); }
+  60%  { transform: translate(-1px, -2px); filter: brightness(1.3); }
+  80%  { transform: translate(1px, 2px); filter: hue-rotate(20deg); }
+  100% { transform: translate(0); filter: none; }
+}
+
+.oracle-glitch {
+  animation: oracle-glitch 0.15s steps(4) infinite;
+}
+
+.oracle-glitch .oracle-card__headline {
+  text-shadow: 2px 0 var(--dt-cyan), -2px 0 var(--dt-blood);
+}
+
+/* ═══════════ SCROLL SENTINEL ═══════════ */
+
+.oracle-scroll-sentinel {
+  text-align: center;
+  padding: 2rem;
+  color: var(--dt-gold-dim);
+  font-family: var(--dt-font-prophecy);
+}
+
+.sigil-pulse {
+  display: inline-block;
+  font-size: 2rem;
+  animation: sigil-spin 3s linear infinite;
+}
+
+@keyframes sigil-spin {
+  0%   { transform: rotate(0deg); opacity: 0.5; }
+  50%  { opacity: 1; }
+  100% { transform: rotate(360deg); opacity: 0.5; }
+}
+
+.oracle-loading .sigil-pulse {
+  animation-duration: 0.8s;
+  color: var(--dt-gold);
+}
+
+.sigil-text {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  opacity: 0.5;
+}
+
+.oracle-end,
+.oracle-end-sigil {
+  font-family: var(--dt-font-scripture);
+  font-style: italic;
+  color: var(--dt-gold-dim);
+  opacity: 0.6;
+  padding: 2rem;
+}
+
+/* ═══════════ AUDIO VISUALIZER ═══════════ */
+
+.dt-oracle-visualizer {
+  display: block;
+  width: 100%;
+  max-width: 900px;
+  height: 160px;
+  margin: 1.5rem auto;
+  border: 1px solid var(--dt-gold-dim);
+  border-radius: var(--dt-radius);
+  background: var(--dt-void-deep);
+}
+
+/* ═══════════ SHARE MODAL ═══════════ */
+
+.dt-share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.dt-share-modal--open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.dt-share-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 3, 9, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.dt-share-modal__content {
+  position: relative;
+  background: linear-gradient(180deg, var(--dt-void) 0%, rgba(138, 43, 226, 0.08) 100%);
+  border: 1px solid var(--dt-gold);
+  border-radius: 12px;
+  padding: 2rem;
+  min-width: 320px;
+  text-align: center;
+  box-shadow: 0 0 60px var(--dt-gold-glow);
+}
+
+.dt-share-modal__title {
+  font-family: var(--dt-font-prophecy);
+  color: var(--dt-gold);
+  margin: 0 0 1.5rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.dt-share-modal__buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dt-share-modal__btn {
+  font-family: var(--dt-font-prophecy);
+  font-size: 0.85rem;
+  padding: 0.8rem 1.5rem;
+  border: 1px solid var(--dt-gold-dim);
+  border-radius: var(--dt-radius);
+  background: var(--dt-smoke);
+  color: var(--dt-parchment);
+  cursor: pointer;
+  transition: all var(--dt-transition);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dt-share-modal__btn:hover {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--dt-gold);
+  color: var(--dt-gold);
+}
+
+.dt-share-modal__close {
+  position: absolute;
+  top: 0.75rem; right: 0.75rem;
+  background: none;
+  border: none;
+  color: var(--dt-parchment);
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+}
+
+.dt-share-modal__close:hover {
+  opacity: 1;
+}
+
+/* ═══════════ TOAST ═══════════ */
+
+.dt-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--dt-void);
+  border: 1px solid var(--dt-gold);
+  color: var(--dt-gold);
+  font-family: var(--dt-font-prophecy);
+  font-size: 0.8rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 40px;
+  z-index: 1000000;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  box-shadow: 0 0 30px var(--dt-gold-glow);
+}
+
+.dt-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════ LISTENING PROGRESS BAR ═══════════ */
+
+.dt-listening-progress {
+  position: relative;
+  width: 100%;
+  height: 3px;
+  background: var(--dt-smoke);
+  border-radius: 2px;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.dt-listening-progress__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--dt-purple), var(--dt-gold));
+  border-radius: 2px;
+  transition: width 0.3s;
+  width: 0%;
+}
+
+.dt-listening-progress__fill.threshold-reached {
+  background: linear-gradient(90deg, var(--dt-gold), var(--dt-cyan));
+  box-shadow: 0 0 8px var(--dt-gold-glow);
+}
+
+/* ═══════════ STREAK DISPLAY ═══════════ */
+
+.dt-streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--dt-font-prophecy);
+  font-size: 0.75rem;
+  background: var(--dt-smoke);
+  border: 1px solid var(--dt-gold-dim);
+  padding: 0.3rem 0.8rem;
+  border-radius: 40px;
+  color: var(--dt-gold);
+}
+
+.dt-streak-badge .streak-fire {
+  font-size: 1rem;
+}
+
+.dt-streak-badge.streak-7 {
+  border-color: var(--dt-gold);
+  box-shadow: 0 0 10px var(--dt-gold-glow);
+}
+
+.dt-streak-badge.streak-14 {
+  border-color: var(--dt-purple);
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.4);
+  color: var(--dt-purple);
+}
+
+.dt-streak-badge.streak-30 {
+  border-color: var(--dt-cyan);
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+  color: var(--dt-cyan);
+  animation: holy-pulse 2s ease-in-out infinite;
+}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+
+@media ( max-width: 640px ) {
+  .oracle-card {
+    flex-direction: column;
+  }
+
+  .oracle-card__image {
+    width: 100%;
+    height: 180px;
+  }
+
+  .oracle-card__actions {
+    flex-direction: column;
+  }
+
+  .oracle-card__actions button {
+    width: 100%;
+    text-align: center;
+  }
+}
