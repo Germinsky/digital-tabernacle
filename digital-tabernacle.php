@@ -107,7 +107,7 @@ function dt_enqueue_frontend() {
     //    ethers v6 only ships ES modules — use v5 UMD for WP compat
     wp_enqueue_script(
         'ethers-js',
-        'https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js',
         array(),
         '5.7.2',
         true
