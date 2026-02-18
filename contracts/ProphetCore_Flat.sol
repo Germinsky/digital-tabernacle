@@ -3,40 +3,58 @@ pragma solidity ^0.8.20;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- *  ProphetCore — The High Priest Contract  (Remix-ready, single file)
+ *  ProphetCore — FLATTENED FOR REMIX DEPLOYMENT
  *  Digital Tabernacle on Base L2  (Chain ID 8453)
  * ═══════════════════════════════════════════════════════════════════════════
  *
- *  • Proof-of-Listening reward harvesting with streak multipliers
- *  • Daily Prophecy — 24-hour Open Edition mint (ERC-1155)
- *  • 7-day streak → 2×, 14-day → 3×, 30-day → 5× reward multiplier
- *  • Anti-cheat: proof hashes verified on-chain
- *  • Ownable: Oracle sets daily prophecy, base reward
- *
- *  Deploy on Base L2 via Remix / Hardhat / Foundry.
- *
- *  Remix: Compiler 0.8.20+, optimizer ON (200 runs), select "ProphetCore"
- *  Deploy tab → Injected Provider → switch MetaMask to Base (8453)
+ *  Deploy steps:
+ *   1. Open https://remix.ethereum.org
+ *   2. Create file → paste this entire file
+ *   3. Compile: Solidity 0.8.20+, EVM target "paris", optimizer ON (200 runs)
+ *   4. Deploy tab → Environment: "Injected Provider - MetaMask"
+ *   5. Switch MetaMask to Base network (Chain 8453)
+ *   6. Constructor args:
+ *        _rewardToken  = your ERC-20 token address (or 0x0…0 as placeholder)
+ *        _prophecyNFT  = your ERC-1155 address     (or 0x0…0 as placeholder)
+ *        _oracle       = your wallet address
+ *   7. Deploy → confirm in MetaMask
+ *   8. Copy deployed address → paste into WP Admin → ⛧ Tabernacle
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-interface IERC1155Mintable {
-    function mint(address to, uint256 id, uint256 amount, bytes calldata data) external;
-}
 
-interface IERC20 {
-    function transfer(address to, uint256 amount) external returns (bool);
-    function balanceOf(address account)           external view returns (uint256);
-}
+// ═══════════════════════════════════════════════════════════════════════════
+//  IProphetCore — High Priest Interface
+// ═══════════════════════════════════════════════════════════════════════════
 
-contract ProphetCore {
+interface IProphetCore {
 
     /* ═══════════ EVENTS ═══════════ */
 
-    event TokensHarvested(address indexed disciple, uint256 indexed songId, uint256 reward, uint256 streak);
-    event DailyProphecyMinted(address indexed disciple, uint256 indexed tokenId, uint256 indexed songId, uint256 timestamp);
-    event DailyProphecySet(uint256 indexed songId, uint256 expiresAt);
-    event StreakUpdated(address indexed disciple, uint256 newStreak, uint256 multiplier);
+    event TokensHarvested(
+        address indexed disciple,
+        uint256 indexed songId,
+        uint256 reward,
+        uint256 streak
+    );
+
+    event DailyProphecyMinted(
+        address indexed disciple,
+        uint256 indexed tokenId,
+        uint256 indexed songId,
+        uint256 timestamp
+    );
+
+    event DailyProphecySet(
+        uint256 indexed songId,
+        uint256 expiresAt
+    );
+
+    event StreakUpdated(
+        address indexed disciple,
+        uint256 newStreak,
+        uint256 multiplier
+    );
 
     /* ═══════════ STRUCTS ═══════════ */
 
@@ -54,6 +72,52 @@ contract ProphetCore {
         uint256 multiplier;
     }
 
+    /* ═══════════ CORE FUNCTIONS ═══════════ */
+
+    function harvestTokens(uint256 songId, bytes32 proofHash) external;
+    function mintDailyProphecy(uint256 songId) external payable returns (uint256 tokenId);
+
+    /* ═══════════ VIEW FUNCTIONS ═══════════ */
+
+    function currentStreak(address disciple) external view returns (uint256);
+    function lastListenTimestamp(address disciple) external view returns (uint256);
+    function getStreakMultiplier(address disciple) external view returns (uint256);
+
+    function dailyProphecy() external view returns (
+        uint256 songId,
+        uint256 expiresAt,
+        uint256 totalMinted
+    );
+
+    function getDiscipleInfo(address disciple) external view returns (DiscipleInfo memory);
+
+    /* ═══════════ ORACLE FUNCTIONS ═══════════ */
+
+    function setDailyProphecy(uint256 songId, string calldata metadataURI) external;
+    function setBaseReward(uint256 amount) external;
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Minimal interfaces
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface IERC1155Mintable {
+    function mint(address to, uint256 id, uint256 amount, bytes calldata data) external;
+}
+
+interface IERC20 {
+    function transfer(address to, uint256 amount) external returns (bool);
+    function balanceOf(address account)           external view returns (uint256);
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ProphetCore — The High Priest Contract
+// ═══════════════════════════════════════════════════════════════════════════
+
+contract ProphetCore is IProphetCore {
+
     /* ═══════════ STATE ═══════════ */
 
     address public owner;
@@ -65,9 +129,9 @@ contract ProphetCore {
     uint256 public baseReward = 10 ether;
     uint256 public mintPrice  = 0.001 ether;
 
-    mapping(address => uint256) public currentStreak;
-    mapping(address => uint256) public lastListenTimestamp;
-    mapping(address => uint256) public totalHarvested;
+    mapping(address => uint256) public override currentStreak;
+    mapping(address => uint256) public override lastListenTimestamp;
+    mapping(address => uint256) public          totalHarvested;
 
     mapping(bytes32 => bool) public usedProofs;
 
@@ -97,25 +161,19 @@ contract ProphetCore {
         prophecyNFT = IERC1155Mintable(_prophecyNFT);
     }
 
-    /* ═══════════════════════════════════════════════════════════════════
-       HARVEST TOKENS  (Module 1 + 2 integration)
-       Called after Proof-of-Listening reaches 90 % on the frontend.
-       ═══════════════════════════════════════════════════════════════════ */
+    /* ═══════════ HARVEST TOKENS ═══════════ */
 
-    function harvestTokens(uint256 songId, bytes32 proofHash) external {
+    function harvestTokens(uint256 songId, bytes32 proofHash) external override {
         require(proofHash != bytes32(0),    "Invalid proof");
         require(!usedProofs[proofHash],     "Proof already used");
 
         usedProofs[proofHash] = true;
 
-        // ── Update streak ────────────────────────────────────────────
         _updateStreak(msg.sender);
 
-        // ── Calculate reward with multiplier ─────────────────────────
         uint256 multiplier = getStreakMultiplier(msg.sender);
         uint256 reward     = baseReward * multiplier;
 
-        // ── Transfer reward tokens ───────────────────────────────────
         require(
             rewardToken.balanceOf(address(this)) >= reward,
             "Tabernacle treasury depleted"
@@ -130,27 +188,19 @@ contract ProphetCore {
         emit TokensHarvested(msg.sender, songId, reward, currentStreak[msg.sender]);
     }
 
-    /* ═══════════════════════════════════════════════════════════════════
-       STREAK MANAGEMENT
-       A "day" = any listen within 24–48 h of the last listen.
-       If > 48 h elapsed, streak resets to 1.
-       ═══════════════════════════════════════════════════════════════════ */
+    /* ═══════════ STREAK MANAGEMENT ═══════════ */
 
     function _updateStreak(address disciple) internal {
         uint256 last = lastListenTimestamp[disciple];
         uint256 elapsed = block.timestamp - last;
 
         if (last == 0) {
-            // First ever listen
             currentStreak[disciple] = 1;
         } else if (elapsed >= ONE_DAY && elapsed < 2 * ONE_DAY) {
-            // Within the streak window → increment
             currentStreak[disciple] += 1;
         } else if (elapsed >= 2 * ONE_DAY) {
-            // Streak broken → reset
             currentStreak[disciple] = 1;
         }
-        // else: same day, no change
 
         lastListenTimestamp[disciple] = block.timestamp;
 
@@ -161,15 +211,9 @@ contract ProphetCore {
         );
     }
 
-    /* ═══════════════════════════════════════════════════════════════════
-       STREAK MULTIPLIER
-       7-day  → 2×
-       14-day → 3×
-       30-day → 5×
-       default → 1×
-       ═══════════════════════════════════════════════════════════════════ */
+    /* ═══════════ STREAK MULTIPLIER ═══════════ */
 
-    function getStreakMultiplier(address disciple) public view returns (uint256) {
+    function getStreakMultiplier(address disciple) public view override returns (uint256) {
         uint256 streak = currentStreak[disciple];
         if (streak >= STREAK_30) return 5;
         if (streak >= STREAK_14) return 3;
@@ -177,16 +221,12 @@ contract ProphetCore {
         return 1;
     }
 
-    /* ═══════════════════════════════════════════════════════════════════
-       DAILY PROPHECY — Open Edition, 24-hour mint window
-       Oracle calls setDailyProphecy() with a songId & metadata URI.
-       Anyone can mintDailyProphecy() during the window.
-       ═══════════════════════════════════════════════════════════════════ */
+    /* ═══════════ DAILY PROPHECY ═══════════ */
 
     function setDailyProphecy(
         uint256 songId,
         string calldata metadataURI
-    ) external onlyOracle {
+    ) external override onlyOracle {
         _dailyProphecy = DailyProphecyInfo({
             songId:      songId,
             expiresAt:   block.timestamp + ONE_DAY,
@@ -197,24 +237,22 @@ contract ProphetCore {
         emit DailyProphecySet(songId, _dailyProphecy.expiresAt);
     }
 
-    function mintDailyProphecy(uint256 songId) external payable returns (uint256 tokenId) {
-        require(_dailyProphecy.songId == songId,           "Wrong prophecy songId");
+    function mintDailyProphecy(uint256 songId) external payable override returns (uint256 tokenId) {
+        require(_dailyProphecy.songId == songId,             "Wrong prophecy songId");
         require(block.timestamp <= _dailyProphecy.expiresAt, "Prophecy window expired");
         require(msg.value >= mintPrice,                      "Insufficient offering");
 
         tokenId = nextTokenId++;
         _dailyProphecy.totalMinted += 1;
 
-        // Mint ERC-1155
         prophecyNFT.mint(msg.sender, tokenId, 1, "");
 
-        // Update streak as well (listening + minting = double devotion)
         _updateStreak(msg.sender);
 
         emit DailyProphecyMinted(msg.sender, tokenId, songId, block.timestamp);
     }
 
-    function dailyProphecy() external view returns (
+    function dailyProphecy() external view override returns (
         uint256 songId,
         uint256 expiresAt,
         uint256 totalMinted
@@ -226,11 +264,9 @@ contract ProphetCore {
         );
     }
 
-    /* ═══════════════════════════════════════════════════════════════════
-       VIEW HELPERS
-       ═══════════════════════════════════════════════════════════════════ */
+    /* ═══════════ VIEW HELPERS ═══════════ */
 
-    function getDiscipleInfo(address disciple) external view returns (DiscipleInfo memory) {
+    function getDiscipleInfo(address disciple) external view override returns (DiscipleInfo memory) {
         return DiscipleInfo({
             currentStreak:       currentStreak[disciple],
             lastListenTimestamp: lastListenTimestamp[disciple],
@@ -239,11 +275,9 @@ contract ProphetCore {
         });
     }
 
-    /* ═══════════════════════════════════════════════════════════════════
-       ADMIN / ORACLE
-       ═══════════════════════════════════════════════════════════════════ */
+    /* ═══════════ ADMIN / ORACLE ═══════════ */
 
-    function setBaseReward(uint256 amount) external onlyOwner {
+    function setBaseReward(uint256 amount) external override onlyOwner {
         baseReward = amount;
     }
 
@@ -263,18 +297,15 @@ contract ProphetCore {
         prophecyNFT = IERC1155Mintable(_nft);
     }
 
-    /// @notice Withdraw accumulated ETH from mint fees
     function withdrawOfferings() external onlyOwner {
         (bool ok, ) = owner.call{value: address(this).balance}("");
         require(ok, "Withdraw failed");
     }
 
-    /// @notice Withdraw any ERC-20 tokens accidentally sent
     function rescueTokens(address token, uint256 amount) external onlyOwner {
         IERC20(token).transfer(owner, amount);
     }
 
-    /// @notice Transfer ownership
     function transferOwnership(address newOwner) external onlyOwner {
         require(newOwner != address(0), "Zero address");
         owner = newOwner;

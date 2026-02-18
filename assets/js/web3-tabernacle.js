@@ -49,9 +49,9 @@
       const accounts = await window.ethereum.request( { method: 'eth_requestAccounts' } );
       userAddress = accounts[0];
 
-      // Create ethers provider + signer
-      provider = new ethers.BrowserProvider( window.ethereum );
-      signer   = await provider.getSigner();
+      // Create ethers provider + signer (ethers v5 UMD)
+      provider = new ethers.providers.Web3Provider( window.ethereum );
+      signer   = provider.getSigner();
 
       // Ensure correct chain
       await switchToBase();
@@ -113,9 +113,9 @@
     try {
       console.log( '[Web3 Tabernacle] Harvesting tokens for song', songId );
 
-      // Convert proofHash to bytes32
-      const proof = ethers.zeroPadValue(
-        ethers.toBeHex( BigInt( proofHash ) || 0n ),
+      // Convert proofHash to bytes32 (ethers v5)
+      const proof = ethers.utils.hexZeroPad(
+        ethers.utils.hexlify( BigInt( proofHash ) || 0n ),
         32
       );
 
@@ -159,7 +159,7 @@
       try {
         mintPrice = await contract.mintPrice();
       } catch {
-        mintPrice = ethers.parseEther( '0.001' );
+        mintPrice = ethers.utils.parseEther( '0.001' );
       }
 
       const tx = await contract.mintDailyProphecy( songId, {
@@ -193,7 +193,7 @@
       const data = {
         streak:     Number( info.currentStreak ),
         lastListen: Number( info.lastListenTimestamp ),
-        harvested:  ethers.formatEther( info.totalHarvested ),
+        harvested:  ethers.utils.formatEther( info.totalHarvested ),
         multiplier: Number( info.multiplier ),
       };
 

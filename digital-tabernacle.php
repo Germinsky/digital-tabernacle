@@ -53,10 +53,10 @@ function dt_enqueue_frontend() {
         DT_VERSION
     );
 
-    // ── Three.js (CDN) ────────────────────────────────────────────────
+    // ── Three.js (CDN — UMD global build, sets window.THREE) ──────────
     wp_enqueue_script(
         'three-js',
-        'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js',
+        'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.min.js',
         array(),
         '0.170.0',
         true
@@ -104,11 +104,12 @@ function dt_enqueue_frontend() {
     );
 
     // ── Web3 Tabernacle — ethers.js bridge (Modules 1+2) ─────────────
+    //    ethers v6 only ships ES modules — use v5 UMD for WP compat
     wp_enqueue_script(
         'ethers-js',
-        'https://cdn.jsdelivr.net/npm/ethers@6.13.0/dist/ethers.min.js',
+        'https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js',
         array(),
-        '6.13.0',
+        '5.7.2',
         true
     );
 
