@@ -38,7 +38,12 @@ add_action( 'init', 'dt_boot' );
 
 function dt_boot() {
     DT_Scripture_CPT::register();
+    DT_Oracle_Feed::init();
+    DT_Farcaster_Frame::init();
 }
+
+// Admin settings need admin_menu + admin_init hooks — call early
+DT_Admin_Settings::init();
 
 add_action( 'wp_enqueue_scripts', 'dt_enqueue_frontend' );
 
